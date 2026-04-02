@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { GROUPS, ALL_MATCHES } from '@/lib/data';
 import { Predictions, Score } from '@/lib/types';
+
+const LS_KEY = 'prode-username';
 
 export default function JugarPage() {
   const [name, setName] = useState('');
@@ -11,25 +13,63 @@ export default function JugarPage() {
   const [saving, setSaving] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [activeGroup, setActiveGroup] = useState('A');
-
   const [joining, setJoining] = useState(false);
+  const [restoring, setRestoring] = useState(true);
 
-  const join = async () => {
-    setError('');
-    setJoining(true);
-    console.log('[Prode] join() called with name:', name.trim());
+  // Restore saved username on mount
+  useEffect(() => {
+    const saved = localStorage.getItem(LS_KEY);
+    if (saved) {
+      setName(saved);
+      enterAs(saved);
+    } else {
+      setRestoring(false);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const enterAs = async (username: string) => {
     try {
       const res = await fetch('/api/participants', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim() }),
+        body: JSON.stringify({ name: username }),
       });
-      console.log('[Prode] POST /api/participants status:', res.status);
+      if (res.ok || res.status === 409) {
+        setJoined(true);
+        localStorage.setItem(LS_KEY, username);
+        try {
+          const predRes = await fetch(`/api/predictions/${encodeURIComponent(username)}`);
+          if (predRes.ok) setPreds(await predRes.json());
+        } catch {
+          /* start fresh */
+        }
+      }
+    } catch {
+      /* will show login screen */
+    } finally {
+      setRestoring(false);
+      setJoining(false);
+    }
+  };
+
+  const join = async () => {
+    setError('');
+    setJoining(true);
+    const clean = name.trim();
+    console.log('[Prode] join() called with name:', clean);
+    try {
+      const res = await fetch('/api/participants', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: clean }),
+      });
 
       if (res.ok || res.status === 409) {
         setJoined(true);
+        localStorage.setItem(LS_KEY, clean);
         try {
-          const predRes = await fetch(`/api/predictions/${encodeURIComponent(name.trim())}`);
+          const predRes = await fetch(`/api/predictions/${encodeURIComponent(clean)}`);
           if (predRes.ok) setPreds(await predRes.json());
         } catch {
           console.warn('[Prode] Could not load predictions, starting fresh');
@@ -46,6 +86,13 @@ export default function JugarPage() {
     }
   };
 
+  const logout = () => {
+    localStorage.removeItem(LS_KEY);
+    setJoined(false);
+    setName('');
+    setPreds({});
+  };
+
   const savePred = useCallback(async (matchId: string, score: Score) => {
     setSaving(matchId);
     setPreds(prev => ({ ...prev, [matchId]: score }));
@@ -60,6 +107,15 @@ export default function JugarPage() {
   const groupMatches = ALL_MATCHES.filter(m => m.group === activeGroup);
   const totalMatches = ALL_MATCHES.length;
   const filledCount = Object.keys(preds).length;
+
+  if (restoring) {
+    return (
+      <div className="flex flex-col items-center pt-20">
+        <span className="text-4xl mb-4 animate-pulse">⚽</span>
+        <p className="text-slate-500 text-sm">Cargando...</p>
+      </div>
+    );
+  }
 
   if (!joined) {
     return (
@@ -99,9 +155,17 @@ export default function JugarPage() {
           <h1 className="font-['Barlow_Condensed'] font-extrabold text-2xl text-white">
             {name.trim()}
           </h1>
-          <p className="text-slate-500 text-xs">
-            {filledCount}/{totalMatches} partidos cargados
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="text-slate-500 text-xs">
+              {filledCount}/{totalMatches} partidos cargados
+            </p>
+            <button
+              onClick={logout}
+              className="text-[10px] text-slate-600 hover:text-red-400 transition-colors"
+            >
+              Cambiar nombre
+            </button>
+          </div>
         </div>
         <div className="w-16 h-16 relative">
           <svg className="w-16 h-16 -rotate-90" viewBox="0 0 36 36">
