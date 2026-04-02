@@ -12,26 +12,37 @@ export default function JugarPage() {
   const [error, setError] = useState('');
   const [activeGroup, setActiveGroup] = useState('A');
 
+  const [joining, setJoining] = useState(false);
+
   const join = async () => {
     setError('');
-    const res = await fetch('/api/participants', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: name.trim() }),
-    });
-    if (res.ok) {
-      setJoined(true);
-      // Load existing predictions
-      const predRes = await fetch(`/api/predictions/${encodeURIComponent(name.trim())}`);
-      if (predRes.ok) setPreds(await predRes.json());
-    } else if (res.status === 409) {
-      // Already exists, just load predictions
-      setJoined(true);
-      const predRes = await fetch(`/api/predictions/${encodeURIComponent(name.trim())}`);
-      if (predRes.ok) setPreds(await predRes.json());
-    } else {
-      const data = await res.json();
-      setError(data.error || 'Error');
+    setJoining(true);
+    console.log('[Prode] join() called with name:', name.trim());
+    try {
+      const res = await fetch('/api/participants', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name.trim() }),
+      });
+      console.log('[Prode] POST /api/participants status:', res.status);
+
+      if (res.ok || res.status === 409) {
+        setJoined(true);
+        try {
+          const predRes = await fetch(`/api/predictions/${encodeURIComponent(name.trim())}`);
+          if (predRes.ok) setPreds(await predRes.json());
+        } catch {
+          console.warn('[Prode] Could not load predictions, starting fresh');
+        }
+      } else {
+        const data = await res.json().catch(() => ({ error: 'Error del servidor' }));
+        setError(data.error || `Error (${res.status})`);
+      }
+    } catch (e) {
+      console.error('[Prode] join() fetch error:', e);
+      setError('No se pudo conectar al servidor. Intentá de nuevo.');
+    } finally {
+      setJoining(false);
     }
   };
 
@@ -71,10 +82,10 @@ export default function JugarPage() {
           {error && <p className="text-red-400 text-sm text-center">{error}</p>}
           <button
             onClick={join}
-            disabled={name.trim().length < 2}
+            disabled={name.trim().length < 2 || joining}
             className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-700 disabled:text-slate-500 text-white font-bold rounded-xl text-lg transition-colors"
           >
-            Entrar
+            {joining ? 'Entrando...' : 'Entrar'}
           </button>
         </div>
       </div>
