@@ -24,9 +24,10 @@ export async function GET() {
     );
 
     const leaderboard = calculateLeaderboard(parts, allPredictions, res);
-    return NextResponse.json({ leaderboard, matchesPlayed: Object.keys(res).length });
+    const paidCount = parts.filter(p => p.paid).length;
+    return NextResponse.json({ leaderboard, matchesPlayed: Object.keys(res).length, totalParticipants: parts.length, paidCount });
   } catch (e) {
     console.error('GET /api/leaderboard error:', e);
-    return NextResponse.json({ leaderboard: [], matchesPlayed: 0 });
+    return NextResponse.json({ leaderboard: [], matchesPlayed: 0, totalParticipants: 0, paidCount: 0 });
   }
 }

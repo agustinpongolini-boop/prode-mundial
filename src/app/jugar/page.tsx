@@ -3,6 +3,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import { GROUPS, ALL_MATCHES } from '@/lib/data';
 import { Predictions, Score } from '@/lib/types';
+import { MONTO_ENTRADA, MP_LINK, MONEDA } from '@/config';
+
+const fmtMoney = (n: number) => `$${n.toLocaleString('es-AR')}`;
 
 const LS_KEY = 'prode-username';
 
@@ -15,6 +18,7 @@ export default function JugarPage() {
   const [activeGroup, setActiveGroup] = useState('A');
   const [joining, setJoining] = useState(false);
   const [restoring, setRestoring] = useState(true);
+  const [paymentInfo, setPaymentInfo] = useState({ total: 0, paid: 0 });
 
   // Restore saved username on mount
   useEffect(() => {
@@ -27,6 +31,13 @@ export default function JugarPage() {
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const fetchPayments = async () => {
+    try {
+      const res = await fetch('/api/payments');
+      if (res.ok) setPaymentInfo(await res.json());
+    } catch { /* silent */ }
+  };
 
   const enterAs = async (username: string) => {
     try {
@@ -44,6 +55,7 @@ export default function JugarPage() {
         } catch {
           /* start fresh */
         }
+        fetchPayments();
       }
     } catch {
       /* will show login screen */
@@ -74,6 +86,7 @@ export default function JugarPage() {
         } catch {
           console.warn('[Prode] Could not load predictions, starting fresh');
         }
+        fetchPayments();
       } else {
         const data = await res.json().catch(() => ({ error: 'Error del servidor' }));
         setError(data.error || `Error (${res.status})`);
@@ -178,6 +191,26 @@ export default function JugarPage() {
             {Math.round((filledCount / totalMatches) * 100)}%
           </span>
         </div>
+      </div>
+
+      {/* Payment banner */}
+      <div className="rounded-xl bg-gradient-to-r from-amber-900/30 to-[#0d1b2e] border border-amber-600/30 p-4 mb-4">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-sm font-bold text-white">
+            Pozo actual: <span className="text-emerald-400">{fmtMoney(paymentInfo.paid * MONTO_ENTRADA)}</span>
+          </span>
+        </div>
+        <a
+          href={MP_LINK}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-center text-sm transition-colors"
+        >
+          Pagar mi entrada ({fmtMoney(MONTO_ENTRADA)} {MONEDA})
+        </a>
+        <p className="text-slate-500 text-[11px] mt-2 text-center">
+          Pagá tu entrada para participar. El admin confirma tu pago.
+        </p>
       </div>
 
       {/* Group tabs */}

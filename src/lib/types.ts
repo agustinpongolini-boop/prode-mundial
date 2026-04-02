@@ -25,6 +25,7 @@ export interface Score {
 export interface Participant {
   name: string;
   addedAt: string;
+  paid?: boolean;
 }
 
 export type Results = Record<string, Score>;

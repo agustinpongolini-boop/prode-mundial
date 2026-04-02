@@ -2,10 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { LeaderboardEntry } from '@/lib/types';
+import { MONTO_ENTRADA, MONEDA } from '@/config';
+
+const fmtMoney = (n: number) => `$${n.toLocaleString('es-AR')}`;
 
 export default function TablaPage() {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [matchesPlayed, setMatchesPlayed] = useState(0);
+  const [totalParticipants, setTotalParticipants] = useState(0);
+  const [paidCount, setPaidCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
@@ -14,6 +19,8 @@ export default function TablaPage() {
       const data = await res.json();
       setEntries(data.leaderboard);
       setMatchesPlayed(data.matchesPlayed);
+      setTotalParticipants(data.totalParticipants);
+      setPaidCount(data.paidCount);
     } catch {
       /* silent */
     } finally {
@@ -41,6 +48,20 @@ export default function TablaPage() {
           Se actualiza cada 30s
         </p>
       </div>
+
+      {/* Pozo */}
+      {!loading && paidCount > 0 && (
+        <div className="rounded-xl bg-gradient-to-r from-emerald-900/40 to-[#0d1b2e] border border-emerald-600/30 p-4 mb-6 text-center">
+          <p className="text-emerald-400 text-xs font-bold uppercase tracking-wider mb-1">Pozo acumulado</p>
+          <p className="font-['Barlow_Condensed'] font-extrabold text-3xl text-white">
+            {fmtMoney(paidCount * MONTO_ENTRADA)} <span className="text-lg text-slate-400">{MONEDA}</span>
+          </p>
+          <p className="text-amber-400 text-sm font-semibold mt-1">El ganador se lleva todo</p>
+          <p className="text-slate-500 text-xs mt-1">
+            {paidCount} de {totalParticipants} participante{totalParticipants !== 1 ? 's' : ''} pagaron
+          </p>
+        </div>
+      )}
 
       {loading ? (
         <div className="text-center py-20 text-slate-500">Cargando...</div>
