@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { GROUPS, ALL_MATCHES } from '@/lib/data';
 import { Predictions, Score } from '@/lib/types';
-import { MONTO_ENTRADA, MP_LINK, MONEDA, MESSI_ACCENT_URL } from '@/config';
+import { MONTO_ENTRADA, MONEDA, MESSI_ACCENT_URL, TESORERO_ALIAS, TESORERO_NOMBRE } from '@/config';
 import { SolDeMayo } from '@/components/SolDeMayo';
 
 const fmtMoney = (n: number) => `$${n.toLocaleString('es-AR')}`;
@@ -20,6 +20,15 @@ export default function JugarPage() {
   const [joining, setJoining] = useState(false);
   const [restoring, setRestoring] = useState(true);
   const [paymentInfo, setPaymentInfo] = useState({ total: 0, paid: 0 });
+  const [aliasCopied, setAliasCopied] = useState(false);
+
+  const copyAlias = async () => {
+    try {
+      await navigator.clipboard.writeText(TESORERO_ALIAS);
+      setAliasCopied(true);
+      setTimeout(() => setAliasCopied(false), 2000);
+    } catch { /* clipboard no disponible */ }
+  };
 
   // Restore saved username on mount
   useEffect(() => {
@@ -227,26 +236,49 @@ export default function JugarPage() {
         </div>
       </div>
 
-      {/* Payment banner — Liquid glass dorado */}
+      {/* Payment block — alias + comprobante por WhatsApp */}
       <div className="rounded-2xl glass-sol p-4 mb-4">
-        <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center justify-between mb-3">
           <span className="text-sm font-bold text-white">
             Pozo actual:{' '}
             <span className="text-[#FCD34D]">
               {fmtMoney(paymentInfo.paid * MONTO_ENTRADA)}
             </span>
           </span>
+          <span className="text-[10px] uppercase tracking-wider text-[#FCD34D] font-bold">
+            Entrada {fmtMoney(MONTO_ENTRADA)} {MONEDA}
+          </span>
         </div>
-        <a
-          href={MP_LINK}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block w-full py-2.5 rounded-xl btn-sol text-center text-sm"
+
+        <button
+          onClick={copyAlias}
+          className="w-full rounded-xl bg-white/10 hover:bg-white/15 border border-white/20 px-4 py-3 text-left transition-all group"
         >
-          Pagar mi entrada ({fmtMoney(MONTO_ENTRADA)} {MONEDA})
-        </a>
-        <p className="text-slate-300 text-[11px] mt-2 text-center">
-          Pagá tu entrada para participar. El admin confirma tu pago.
+          <p className="text-[10px] uppercase tracking-widest text-slate-300 mb-0.5">
+            Alias de transferencia
+          </p>
+          <div className="flex items-center justify-between gap-2">
+            <span className="font-['Barlow_Condensed'] font-black text-2xl text-white tracking-wide">
+              {TESORERO_ALIAS}
+            </span>
+            <span className={`text-xs font-bold px-2.5 py-1 rounded-md transition-all ${
+              aliasCopied
+                ? 'bg-[#8FC1F0]/30 text-[#8FC1F0]'
+                : 'bg-white/10 text-slate-200 group-hover:bg-white/20'
+            }`}>
+              {aliasCopied ? '✓ Copiado' : 'Copiar'}
+            </span>
+          </div>
+          <p className="text-[11px] text-slate-300 mt-1">
+            Tesorero: <span className="text-white font-semibold">{TESORERO_NOMBRE}</span>
+          </p>
+        </button>
+
+        <p className="text-slate-200 text-[11px] mt-3 leading-relaxed text-center">
+          Transferí al alias y mandá el comprobante al grupo de WhatsApp.
+          <br />
+          <span className="text-[#FCD34D] font-semibold">Es grupo de confianza:</span>{' '}
+          podés cargar predicciones sin pagar todavía.
         </p>
       </div>
 
