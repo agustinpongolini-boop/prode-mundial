@@ -2,12 +2,157 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700;800;900&display=swap');
+
+:root {
+  --arg-celeste: #75AADB;
+  --arg-celeste-bright: #8FC1F0;
+  --arg-celeste-deep: #4A8BC7;
+  --arg-sol: #F6B40E;
+  --arg-sol-soft: #FCD34D;
+  --arg-navy: #051838;
+  --arg-navy-deep: #020a1d;
+}
+
+html, body {
+  background: var(--arg-navy-deep);
+  color: #f1f5f9;
+  font-family: 'Barlow', system-ui, sans-serif;
+  min-height: 100vh;
+}
 
 body {
-  background: #080d1a;
-  color: #e2e8f0;
-  font-family: 'Barlow', system-ui, sans-serif;
+  background:
+    radial-gradient(ellipse 90% 60% at 50% -10%, rgba(117, 170, 219, 0.35) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 50% at 10% 110%, rgba(246, 180, 14, 0.18) 0%, transparent 55%),
+    radial-gradient(ellipse 70% 60% at 95% 80%, rgba(117, 170, 219, 0.22) 0%, transparent 55%),
+    linear-gradient(180deg, #051838 0%, #020a1d 60%, #04122b 100%);
+  background-attachment: fixed;
+}
+
+/* Liquid Glass utilities */
+.glass {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.25),
+    0 8px 32px rgba(2, 10, 29, 0.5);
+}
+
+.glass-strong {
+  background: rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(30px) saturate(180%);
+  -webkit-backdrop-filter: blur(30px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+    0 12px 40px rgba(2, 10, 29, 0.55);
+}
+
+.glass-celeste {
+  background: linear-gradient(135deg, rgba(143, 193, 240, 0.22) 0%, rgba(117, 170, 219, 0.10) 100%);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid rgba(143, 193, 240, 0.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.30),
+    inset 0 -1px 0 rgba(74, 139, 199, 0.25),
+    0 10px 30px rgba(74, 139, 199, 0.18);
+}
+
+.glass-sol {
+  background: linear-gradient(135deg, rgba(246, 180, 14, 0.20) 0%, rgba(252, 211, 77, 0.08) 100%);
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid rgba(246, 180, 14, 0.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    0 10px 30px rgba(246, 180, 14, 0.12);
+}
+
+.glass-nav {
+  background: rgba(5, 24, 56, 0.55);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(143, 193, 240, 0.20);
+}
+
+/* Liquid Glass button */
+.btn-celeste {
+  background: linear-gradient(180deg, #8FC1F0 0%, #4A8BC7 100%);
+  color: #051838;
+  font-weight: 800;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15),
+    0 6px 20px rgba(117, 170, 219, 0.4);
+  transition: all 0.2s ease;
+}
+.btn-celeste:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 10px 28px rgba(117, 170, 219, 0.55);
+}
+.btn-celeste:disabled {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.3);
+  box-shadow: none;
+}
+
+.btn-sol {
+  background: linear-gradient(180deg, #FCD34D 0%, #F6B40E 100%);
+  color: #4a2e00;
+  font-weight: 800;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.15),
+    0 6px 20px rgba(246, 180, 14, 0.4);
+  transition: all 0.2s ease;
+}
+.btn-sol:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 10px 28px rgba(246, 180, 14, 0.55);
+}
+
+/* Glass input */
+.input-glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  transition: all 0.2s ease;
+}
+.input-glass:focus {
+  outline: none;
+  border-color: rgba(143, 193, 240, 0.7);
+  background: rgba(143, 193, 240, 0.08);
+  box-shadow: 0 0 0 3px rgba(143, 193, 240, 0.15);
+}
+
+/* Messi hero shimmer */
+.hero-shimmer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(120deg, transparent 30%, rgba(255, 255, 255, 0.12) 50%, transparent 70%);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+@keyframes sol-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+.sol-spin {
+  animation: sol-spin 60s linear infinite;
 }
 
 input[type="number"] {
@@ -18,3 +163,12 @@ input[type="number"]::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: rgba(143, 193, 240, 0.25);
+  border-radius: 8px;
+}
+::-webkit-scrollbar-thumb:hover { background: rgba(143, 193, 240, 0.45); }
