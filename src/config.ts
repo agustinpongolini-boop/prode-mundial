@@ -1,6 +1,10 @@
-export const MONTO_ENTRADA = 5000;
-export const MP_LINK = "https://link.mercadopago.com.ar/prodemundial2026";
+export const MONTO_ENTRADA = 20000;
 export const MONEDA = "ARS";
+
+// Tesorero — recibe los pagos por transferencia.
+// Los participantes copian el alias y mandan comprobante por WhatsApp.
+export const TESORERO_ALIAS = "termomiller";
+export const TESORERO_NOMBRE = "Termo Miller";
 
 // Imagen Messi — guardá la foto en public/messi-hero.jpg y queda lista.
 // (También funciona con una URL externa https://… si preferís).
