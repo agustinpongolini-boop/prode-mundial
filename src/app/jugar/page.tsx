@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { GROUPS, ALL_MATCHES } from '@/lib/data';
 import { Predictions, Score } from '@/lib/types';
-import { MONTO_ENTRADA, MP_LINK, MONEDA } from '@/config';
+import { MONTO_ENTRADA, MP_LINK, MONEDA, MESSI_ACCENT_URL } from '@/config';
+import { SolDeMayo } from '@/components/SolDeMayo';
 
 const fmtMoney = (n: number) => `$${n.toLocaleString('es-AR')}`;
 
@@ -69,7 +70,6 @@ export default function JugarPage() {
     setError('');
     setJoining(true);
     const clean = name.trim();
-    console.log('[Prode] join() called with name:', clean);
     try {
       const res = await fetch('/api/participants', {
         method: 'POST',
@@ -84,15 +84,14 @@ export default function JugarPage() {
           const predRes = await fetch(`/api/predictions/${encodeURIComponent(clean)}`);
           if (predRes.ok) setPreds(await predRes.json());
         } catch {
-          console.warn('[Prode] Could not load predictions, starting fresh');
+          /* start fresh */
         }
         fetchPayments();
       } else {
         const data = await res.json().catch(() => ({ error: 'Error del servidor' }));
         setError(data.error || `Error (${res.status})`);
       }
-    } catch (e) {
-      console.error('[Prode] join() fetch error:', e);
+    } catch {
       setError('No se pudo conectar al servidor. Intentá de nuevo.');
     } finally {
       setJoining(false);
@@ -125,34 +124,56 @@ export default function JugarPage() {
     return (
       <div className="flex flex-col items-center pt-20">
         <span className="text-4xl mb-4 animate-pulse">⚽</span>
-        <p className="text-slate-500 text-sm">Cargando...</p>
+        <p className="text-slate-400 text-sm">Cargando...</p>
       </div>
     );
   }
 
   if (!joined) {
     return (
-      <div className="flex flex-col items-center pt-12">
-        <span className="text-6xl mb-4">⚽</span>
-        <h1 className="font-['Barlow_Condensed'] font-extrabold text-3xl text-white tracking-wide mb-2">
-          SUMATE AL PRODE
-        </h1>
-        <p className="text-slate-400 text-sm mb-8 text-center">
-          Ingresá tu nombre y cargá tus predicciones
-        </p>
-        <div className="w-full max-w-xs space-y-3">
+      <div className="flex flex-col items-center pt-8">
+        <div className="relative w-full rounded-3xl glass-strong hero-shimmer overflow-hidden p-8 text-center">
+          {MESSI_ACCENT_URL && (
+            <div
+              className="absolute inset-0 opacity-50"
+              style={{
+                backgroundImage: `url(${MESSI_ACCENT_URL})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center 25%',
+              }}
+            />
+          )}
+          <div className="absolute inset-0 bg-gradient-to-t from-[#051838]/95 via-[#051838]/40 to-transparent" />
+          <div className="absolute -right-6 -top-6 opacity-30 sol-spin pointer-events-none">
+            <SolDeMayo size={140} />
+          </div>
+          <div className="relative z-10 flex flex-col items-center">
+            <div className="flex gap-1 mb-3">
+              <span className="text-[#F6B40E] drop-shadow-[0_2px_6px_rgba(246,180,14,0.6)]">★</span>
+              <span className="text-[#F6B40E] drop-shadow-[0_2px_6px_rgba(246,180,14,0.6)]">★</span>
+              <span className="text-[#F6B40E] drop-shadow-[0_2px_6px_rgba(246,180,14,0.6)]">★</span>
+            </div>
+            <h1 className="font-['Barlow_Condensed'] font-black text-3xl text-white tracking-wide drop-shadow">
+              SUMATE AL PRODE
+            </h1>
+            <p className="text-slate-200 text-sm mt-2">
+              Cargá tus predicciones y competí
+            </p>
+          </div>
+        </div>
+        <div className="w-full max-w-xs mt-6 space-y-3">
           <input
             value={name}
             onChange={e => setName(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && name.trim().length >= 2 && join()}
             placeholder="Tu nombre"
-            className="w-full bg-[#0d1b2e] border border-[#1a3a5c] rounded-xl px-4 py-3 text-white text-center font-semibold text-lg outline-none focus:border-emerald-500 transition-colors"
+            className="w-full input-glass rounded-xl px-4 py-3 text-center font-semibold text-lg"
           />
           {error && <p className="text-red-400 text-sm text-center">{error}</p>}
           <button
             onClick={join}
             disabled={name.trim().length < 2 || joining}
-            className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-700 disabled:text-slate-500 text-white font-bold rounded-xl text-lg transition-colors"
+            className="w-full py-3 rounded-xl btn-celeste text-lg disabled:cursor-not-allowed"
           >
             {joining ? 'Entrando...' : 'Entrar'}
           </button>
@@ -163,66 +184,85 @@ export default function JugarPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4">
-        <div>
-          <h1 className="font-['Barlow_Condensed'] font-extrabold text-2xl text-white">
+      <div className="flex items-center justify-between mb-4 rounded-2xl glass px-4 py-3">
+        <div className="min-w-0">
+          <h1 className="font-['Barlow_Condensed'] font-black text-2xl text-white truncate">
             {name.trim()}
           </h1>
           <div className="flex items-center gap-2">
-            <p className="text-slate-500 text-xs">
+            <p className="text-slate-300 text-xs">
               {filledCount}/{totalMatches} partidos cargados
             </p>
             <button
               onClick={logout}
-              className="text-[10px] text-slate-600 hover:text-red-400 transition-colors"
+              className="text-[10px] text-slate-500 hover:text-red-400 transition-colors"
             >
               Cambiar nombre
             </button>
           </div>
         </div>
-        <div className="w-16 h-16 relative">
+        <div className="w-16 h-16 relative flex-shrink-0">
           <svg className="w-16 h-16 -rotate-90" viewBox="0 0 36 36">
-            <circle cx="18" cy="18" r="15" fill="none" stroke="#1a3a5c" strokeWidth="3" />
-            <circle cx="18" cy="18" r="15" fill="none" stroke="#16a34a" strokeWidth="3"
+            <circle cx="18" cy="18" r="15" fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="3" />
+            <circle
+              cx="18"
+              cy="18"
+              r="15"
+              fill="none"
+              stroke="url(#progressGrad)"
+              strokeWidth="3"
               strokeDasharray={`${(filledCount / totalMatches) * 94.2} 94.2`}
-              strokeLinecap="round" />
+              strokeLinecap="round"
+            />
+            <defs>
+              <linearGradient id="progressGrad" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="#8FC1F0" />
+                <stop offset="100%" stopColor="#FCD34D" />
+              </linearGradient>
+            </defs>
           </svg>
-          <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-white">
+          <span className="absolute inset-0 flex items-center justify-center text-xs font-black text-white">
             {Math.round((filledCount / totalMatches) * 100)}%
           </span>
         </div>
       </div>
 
-      {/* Payment banner */}
-      <div className="rounded-xl bg-gradient-to-r from-amber-900/30 to-[#0d1b2e] border border-amber-600/30 p-4 mb-4">
+      {/* Payment banner — Liquid glass dorado */}
+      <div className="rounded-2xl glass-sol p-4 mb-4">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-bold text-white">
-            Pozo actual: <span className="text-emerald-400">{fmtMoney(paymentInfo.paid * MONTO_ENTRADA)}</span>
+            Pozo actual:{' '}
+            <span className="text-[#FCD34D]">
+              {fmtMoney(paymentInfo.paid * MONTO_ENTRADA)}
+            </span>
           </span>
         </div>
         <a
           href={MP_LINK}
           target="_blank"
           rel="noopener noreferrer"
-          className="block w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-center text-sm transition-colors"
+          className="block w-full py-2.5 rounded-xl btn-sol text-center text-sm"
         >
           Pagar mi entrada ({fmtMoney(MONTO_ENTRADA)} {MONEDA})
         </a>
-        <p className="text-slate-500 text-[11px] mt-2 text-center">
+        <p className="text-slate-300 text-[11px] mt-2 text-center">
           Pagá tu entrada para participar. El admin confirma tu pago.
         </p>
       </div>
 
       {/* Group tabs */}
-      <div className="flex gap-1.5 overflow-x-auto pb-2 mb-4 -mx-4 px-4" style={{ scrollbarWidth: 'none' }}>
+      <div
+        className="flex gap-1.5 overflow-x-auto pb-2 mb-4 -mx-4 px-4"
+        style={{ scrollbarWidth: 'none' }}
+      >
         {GROUPS.map(g => (
           <button
             key={g.name}
             onClick={() => setActiveGroup(g.name)}
-            className={`flex-shrink-0 px-3 py-1.5 rounded-lg text-sm font-bold transition-colors ${
+            className={`flex-shrink-0 px-4 py-1.5 rounded-lg text-sm font-bold transition-all ${
               activeGroup === g.name
-                ? 'bg-emerald-600 text-white'
-                : 'bg-[#0d1b2e] text-slate-400 hover:text-white border border-[#1a3a5c]'
+                ? 'btn-celeste'
+                : 'glass text-slate-300 hover:text-white'
             }`}
           >
             {g.name}
@@ -232,7 +272,9 @@ export default function JugarPage() {
 
       {/* Group header */}
       <div className="flex items-center gap-2 mb-3">
-        <span className="font-['Barlow_Condensed'] font-bold text-lg text-white">GRUPO {activeGroup}</span>
+        <span className="font-['Barlow_Condensed'] font-black text-lg text-white">
+          GRUPO {activeGroup}
+        </span>
         <div className="flex gap-1">
           {GROUPS.find(g => g.name === activeGroup)?.teams.map(t => (
             <span key={t.code} className="text-lg" title={t.name}>{t.flag}</span>
@@ -249,18 +291,16 @@ export default function JugarPage() {
           return (
             <div
               key={match.id}
-              className={`rounded-xl border p-3 transition-colors ${
-                pred ? 'bg-[#0d1b2e] border-emerald-600/30' : 'bg-[#0d1b2e] border-[#1a3a5c]'
+              className={`rounded-2xl p-3 transition-all ${
+                pred ? 'glass-celeste' : 'glass'
               }`}
             >
               <div className="flex items-center gap-2">
-                {/* Home */}
                 <div className="flex-1 flex items-center gap-2 justify-end">
-                  <span className="text-sm font-semibold text-slate-200 truncate">{match.home.name}</span>
+                  <span className="text-sm font-semibold text-slate-100 truncate">{match.home.name}</span>
                   <span className="text-xl">{match.home.flag}</span>
                 </div>
 
-                {/* Score inputs */}
                 <div className="flex items-center gap-1 mx-1">
                   <input
                     type="number"
@@ -281,10 +321,10 @@ export default function JugarPage() {
                         savePred(match.id, p);
                       }
                     }}
-                    className="w-10 h-10 bg-[#0a1628] border border-[#1a3a5c] rounded-lg text-center text-white font-bold text-lg outline-none focus:border-emerald-500 transition-colors"
+                    className="w-10 h-10 input-glass rounded-lg text-center font-bold text-lg"
                     placeholder="-"
                   />
-                  <span className="text-slate-600 font-bold">:</span>
+                  <span className="text-slate-400 font-bold">:</span>
                   <input
                     type="number"
                     min="0"
@@ -304,26 +344,24 @@ export default function JugarPage() {
                         savePred(match.id, p);
                       }
                     }}
-                    className="w-10 h-10 bg-[#0a1628] border border-[#1a3a5c] rounded-lg text-center text-white font-bold text-lg outline-none focus:border-emerald-500 transition-colors"
+                    className="w-10 h-10 input-glass rounded-lg text-center font-bold text-lg"
                     placeholder="-"
                   />
                 </div>
 
-                {/* Away */}
                 <div className="flex-1 flex items-center gap-2">
                   <span className="text-xl">{match.away.flag}</span>
-                  <span className="text-sm font-semibold text-slate-200 truncate">{match.away.name}</span>
+                  <span className="text-sm font-semibold text-slate-100 truncate">{match.away.name}</span>
                 </div>
               </div>
 
-              {/* Status indicator */}
               <div className="flex justify-center mt-1">
                 {isSaving ? (
-                  <span className="text-[10px] text-amber-400">Guardando...</span>
+                  <span className="text-[10px] text-[#FCD34D]">Guardando...</span>
                 ) : pred ? (
-                  <span className="text-[10px] text-emerald-500">✓ Guardado</span>
+                  <span className="text-[10px] text-[#8FC1F0]">✓ Guardado</span>
                 ) : (
-                  <span className="text-[10px] text-slate-600">Fecha {match.matchday}</span>
+                  <span className="text-[10px] text-slate-500">Fecha {match.matchday}</span>
                 )}
               </div>
             </div>
